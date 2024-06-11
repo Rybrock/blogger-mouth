@@ -1,10 +1,15 @@
+// composables/useAxios.ts
 import axios from 'axios';
 
-export function useAxios() {
-  const api = axios.create({
-    baseURL: 'http://localhost:8087',
-    withCredentials: true
+const useAxios = () => {
+  const instance = axios.create({
+    baseURL: 'http://blog.test', 
+    withCredentials: true, 
   });
 
-  return api;
-}
+  instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+  return instance;
+};
+
+export default useAxios;

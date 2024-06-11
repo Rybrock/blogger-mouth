@@ -4,58 +4,54 @@
       <h2 class="pb-10 font-bold text-lg">Register for an account</h2>
       <div class="mb-4">
         <label for="name" class="sr-only">Name</label>
-        <input v-model="form.name" type="text" id="name" placeholder="Name" autocomplete="name" required class="px-4 py-2 border rounded-md">
+        <input v-model="form.name" type="text" id="name" placeholder="Name" class="px-4 py-2 border rounded-md">
       </div>
       <div class="mb-4">
         <label for="email" class="sr-only">Email</label>
-        <input v-model="form.email" type="email" id="email" placeholder="Email" autocomplete="email" required class="px-4 py-2 border rounded-md">
+        <input v-model="form.email" type="email" id="email" placeholder="Email" class="px-4 py-2 border rounded-md">
       </div>
       <div class="mb-4">
         <label for="password" class="sr-only">Password</label>
-        <input v-model="form.password" type="password" id="password" placeholder="Password" autocomplete="password" required class="px-4 py-2 border rounded-md">
+        <input v-model="form.password" type="password" id="password" placeholder="Password" class="px-4 py-2 border rounded-md">
       </div>
       <div class="mb-4">
         <label for="password_confirmation" class="sr-only">Confirm Password</label>
-        <input v-model="form.password_confirmation" type="password" id="password_confirmation" autocomplete="new-password" placeholder="Confirm Password" required class="px-4 py-2 border rounded-md">
+        <input v-model="form.password_confirmation" type="password" id="password_confirmation" placeholder="Confirm Password" class="px-4 py-2 border rounded-md">
       </div>
-      <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Register</button>
+      <button :disabled="loading" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Register</button>
     </form>
     <div v-if="message" class="mt-4 text-red-500 font-bold">{{ message }}</div>
   </div>
 </template>
 
-  
-  <script setup>
-  import { ref } from 'vue'
-  import { useAxios } from '~/composables/useAxios'
-  import { useRouter } from 'vue-router'; // Import the useRouter function
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/useAuthStore';
 
-const router = useRouter();
-const user = ref(null);
-  
-  const form = ref({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: ''
-  })
-  const message = ref('');
-  
-  const register = async () => {
-    try {
-    const response = await useAxios().post('/register', form.value);
-    message.value = response.data.message;
-    response.data = user;
-    console.log(user);
+
+const auth = useAuthStore();
+const router = useRouter()
+const user = ref(null)
+const message = ref('')
+const loading = ref(false)
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: ''
+})
+
+async function register() {
+  message.value = ''
+  try {
+    const response = await auth.register(form.value)
+    user.value = response.data.user
+    console.log('User registered:', user.value);
     router.push('/');
   } catch (error) {
-    console.error(error);
-    message.value = error.response.data.message || 'An error occurred';
-  }
+    console.error('Registration error:', error);
+    message.value = error.response?.data?.message || 'An error occurred during registration.';
+  } 
 }
-
-
-  </script>
-
-  
-  
+</script>

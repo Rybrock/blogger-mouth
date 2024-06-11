@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- -->
     <div class="pt-16 flex flex-col">
       <form
         method="POST"
@@ -24,25 +23,35 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
-  import { useAxios } from '~/composables/useAxios'
-  
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useAuthStore } from '~/stores/useAuthStore';
+
+  const auth = useAuthStore(); 
+  const router = useRouter();
+  const message = ref('');
+
   const form = ref({
-    name: '',
     email: '',
-    password: '',
-    password_confirmation: ''
-  })
-  console.log(form)
-  
-  const login = async () => {
-  try {
-    const response = await useAxios().post('/login', form.value);
-    console.log(response);
-  } catch (error) {
-    console.log(error)
+    password: ''
+  });
+
+  async function login() {
+    try {
+      console.log('Attempting to get CSRF cookie...');
+      await useApiFetch("/sanctum/csrf-cookie", {
+        method: "GET",
+        credentials: "include"
+      });
+
+      console.log('Attempting to log in with:', form.value);
+      const response = await auth.login(form.value);
+      message.value = response.data.message;
+      router.push('/');
+      console.log('logged in', response.data);
+    } catch (error) {
+      console.error("Login error:", error);
+      message.value = error.response?.data?.message || 'An error occurred';
+    }
   }
-}
-
-
 </script>

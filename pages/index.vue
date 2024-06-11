@@ -2,7 +2,6 @@
 import {onMounted} from 'vue';
 
 onMounted(async () => {
-  console.log('rendered');
 });
 </script>
 
