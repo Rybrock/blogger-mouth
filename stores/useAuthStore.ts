@@ -20,24 +20,17 @@ type RegistrationInfo = {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-    const user = ref<User | null>(null);
-    const isLoggedIn = computed(() => !!user.value);
+    const user = ref<User | null>(null)
+    const isLoggedIn = computed(() => !!user.value)
 
     async function fetchUser() {
-        await useApiFetch("/sanctum/csrf-cookie")
-        try {
-            const { data } = await useApiFetch("/api/user");
-            user.value = data.value as User;
-            console.log(user.value);
-        } catch (error) {
-            console.error("Error fetching user:", error);
-            user.value = null;
-        }
+        const {data} = await useApiFetch("/api/user")
+        user.value = data.value as User
     }
 
     async function login(credentials: Credentials) {
         await useApiFetch("/sanctum/csrf-cookie")
-        const login = await useApiFetch("/api/login", {
+        const login = await useApiFetch("/login", {
             method: "POST",
             body: credentials
         })
@@ -50,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function register(info: RegistrationInfo) {
         await useApiFetch("/sanctum/csrf-cookie")
 
-        const register = await useApiFetch("/api/register", {
+        const register = await useApiFetch("/register", {
             method: "POST",
             body: info
         })
@@ -61,23 +54,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function logout() {
-        try {
-            await useApiFetch("/logout", { method: "POST" });
-            user.value = null;
-            localStorage.removeItem('authToken'); // Remove the token
-            navigateTo('/');
-        } catch (error) {
-            console.error("Error during logout:", error);
-        }
+        await useApiFetch("/logout", { method: "POST"})
+        user.value = null
+        navigateTo('/')
     }
 
-    function initialize() {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            useApiFetch.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            fetchUser();
-        }
-    }
-
-    return { user, login, isLoggedIn, fetchUser, logout, register, initialize };
-});
+    return { user, login, isLoggedIn, fetchUser, logout, register }
+})

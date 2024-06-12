@@ -19,39 +19,32 @@
         <input v-model="form.password_confirmation" type="password" id="password_confirmation" placeholder="Confirm Password" class="px-4 py-2 border rounded-md">
       </div>
       <button :disabled="loading" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Register</button>
+      <p class="text-xs mt-2">Already got an account? Login <nuxt-link to="/auth/login" class="text-blue-500">here</nuxt-link></p>
     </form>
     <div v-if="message" class="mt-4 text-red-500 font-bold">{{ message }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '~/stores/useAuthStore';
 
-
 const auth = useAuthStore();
-const router = useRouter()
-const user = ref(null)
-const message = ref('')
-const loading = ref(false)
+const router = useRouter();
+const message = ref('');
+const loading = ref(false);
 const form = ref({
-  name: '',
-  email: '',
-  password: '',
-  password_confirmation: ''
-})
+  name: 'Ryan Brockley',
+  email: 'test@test.com',
+  password: 'qwertyui',
+  password_confirmation: 'qwertyui'
+});
 
 async function register() {
-  message.value = ''
-  try {
-    const response = await auth.register(form.value)
-    user.value = response.data.user
-    console.log('User registered:', user.value);
-    router.push('/');
-  } catch (error) {
-    console.error('Registration error:', error);
-    message.value = error.response?.data?.message || 'An error occurred during registration.';
+
+    await auth.register(form.value);
+    console.log('User registered:', form.value);
+    router.push('/home');
   } 
-}
 </script>

@@ -1,26 +1,9 @@
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useAuthStore } from '~/stores/useAuthStore';
-
-const isOpen = ref(false);
-const auth = useAuthStore();
-
-onMounted(async () => {
-  try {
-    await auth.fetchUser();
-    console.log('Current user:', auth.user);
-  } catch (error) {
-    console.error('Error fetching user:', error);
-  }
-});
-</script>
-
-
 <template>
   <div>
     <header class="fixed top-0 right-0 left-0 bg-slate-700 text-white">
       <nav class="flex justify-between items-center">
         <span class="px-3 py-5">Blogger Mouth</span>
+        <span v-if="auth.isLoggedIn" class="text-white">{{ auth.user.username}}</span>
         <font-awesome-icon
           @click="isOpen = true"
           icon="fa-solid fa-bars"
@@ -40,21 +23,21 @@ onMounted(async () => {
           </div>
           <div>
             <div class="flex flex-col gap-y-4 mt-6">
-              <nuxt-link to="/" @click="isOpen = false">
+              <nuxt-link v-if="auth.isLoggedIn" to="/home" @click="isOpen = false">
                 <span>Home</span>
               </nuxt-link>
-              <nuxt-link to="/content/posts" @click="isOpen = false">
+              <nuxt-link v-if="auth.isLoggedIn" to="/content/posts" @click="isOpen = false">
                 <span>Posts</span>
               </nuxt-link>
-              <nuxt-link to="/auth/register" @click="isOpen = false">
+              <nuxt-link v-if="!auth.isLoggedIn" to="/auth/register" @click="isOpen = false">
                 <span>Register</span>
               </nuxt-link>
-              <nuxt-link to="/auth/login" @click="isOpen = false">
+              <nuxt-link v-if="!auth.isLoggedIn" to="/auth/login" @click="isOpen = false">
                 <span>Login</span>
               </nuxt-link>
-              <!-- <div @click.prevent="logout()">
-                <button>Logout</button>
-              </div> -->
+              <div @click.prevent="handleLogout()">
+                <button @click="isOpen = false">Logout</button>
+              </div>
             </div>
           </div>
         </div>
@@ -62,4 +45,20 @@ onMounted(async () => {
     </header>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useAuthStore } from '~/stores/useAuthStore';
+
+const isOpen = ref(false);
+const auth = useAuthStore();
+
+async function handleLogout() {
+        await auth.logout()
+        navigateTo("/")
+    }
+</script>
+
+
+
 
